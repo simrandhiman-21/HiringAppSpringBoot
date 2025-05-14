@@ -1,4 +1,4 @@
-package com.learning.HiringApp.service.producer;
+package com.learning.HiringApp.producer;
 
 import com.learning.HiringApp.config.RabbitMQMail;
 import lombok.extern.slf4j.Slf4j;

@@ -8,10 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.learning.HiringApp.service.producer.RabbitProducer;
+import com.learning.HiringApp.producer.RabbitProducer;
 
 
-import java.time.LocalDateTime;
 import java.util.List;
 //2 8 12
 @RestController

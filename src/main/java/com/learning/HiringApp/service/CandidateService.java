@@ -1,16 +1,12 @@
 package com.learning.HiringApp.service;
 
-import com.learning.HiringApp.dtos.CandidateDTO;
 import com.learning.HiringApp.entity.Candidate;
 import com.learning.HiringApp.enums.CandidateStatus;
-import com.learning.HiringApp.exceptions.CandidateNotFoundException;
-import com.learning.HiringApp.exceptions.InvalidStatusTransitionException;
 import com.learning.HiringApp.exceptions.NotFoundException;
-import com.learning.HiringApp.exceptions.ResourceNotFoundException;
 import com.learning.HiringApp.repository.CandidateRepository;
 import com.learning.HiringApp.mapper.CandidateMapper;
-import com.learning.HiringApp.service.producer.DocumentProducer;
-import com.learning.HiringApp.service.producer.RabbitProducer;
+import com.learning.HiringApp.producer.DocumentProducer;
+import com.learning.HiringApp.producer.RabbitProducer;
 
 import lombok.extern.slf4j.Slf4j;
 //import org.apache.poi.ss.usermodel.Row;
@@ -20,12 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j

@@ -1,4 +1,4 @@
-package com.learning.HiringApp.service.producer;
+package com.learning.HiringApp.producer;
 
 import com.learning.HiringApp.config.RabbitMQMail;
 import com.learning.HiringApp.dtos.CandidateDTO;

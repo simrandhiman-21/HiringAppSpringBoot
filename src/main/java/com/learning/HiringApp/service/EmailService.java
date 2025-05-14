@@ -1,5 +1,6 @@
 package com.learning.HiringApp.service;
 
+import com.learning.HiringApp.authDto.OtpMessage;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
 
 import java.util.Map;
 
@@ -39,4 +41,10 @@ public class EmailService {
         // Send email
         mailSender.send(mimeMessage);
     }
+
+    public void sendOtpMail(OtpMessage otpMessage) throws MessagingException {
+        Map<String, Object> model = Map.of("otp", otpMessage.getOtp());
+        sendMailWithTemplate(otpMessage.getTo(), "Your OTP Code", model);
+    }
+
 }

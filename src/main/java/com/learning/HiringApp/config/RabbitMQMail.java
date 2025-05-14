@@ -1,8 +1,6 @@
 package com.learning.HiringApp.config;
 
-import com.rabbitmq.client.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -12,9 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQMail {
 
-    //i.e., Producer → Queue → Consumer → Email Service
-
-    // for mailing
+    // for mailing (candidate status updates)
     public static final String QUEUE_NAME = "myQueue";
     public static final String EXCHANGE = "myExchange";
     public static final String ROUTING_KEY = "myRoutingKey";
@@ -34,6 +30,25 @@ public class RabbitMQMail {
         return BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY);
     }
 
+    // OTP queue and exchange
+    public static final String OTP_QUEUE = "hiringAuthOtpQueue";
+    public static final String OTP_EXCHANGE = "hiringAuthOtpTopicExchange";
+    public static final String OTP_ROUTING_KEY = "auth.otp";
+
+    @Bean
+    public Queue otpQueue() {
+        return new Queue(OTP_QUEUE, true); // durable queue
+    }
+
+    @Bean
+    public TopicExchange otpExchange() {
+        return new TopicExchange(OTP_EXCHANGE);
+    }
+
+    @Bean
+    public Binding otpBinding(Queue otpQueue, TopicExchange otpExchange) {
+        return BindingBuilder.bind(otpQueue).to(otpExchange).with(OTP_ROUTING_KEY);
+    }
 
     // for document
     public static final String DOCUMENT_QUEUE = "document.queue";
@@ -52,13 +67,10 @@ public class RabbitMQMail {
 
     @Bean
     public Binding documentBinding(Queue documentQueue, TopicExchange documentExchange) {
-        return BindingBuilder
-                .bind(documentQueue)
-                .to(documentExchange)
-                .with(DOCUMENT_ROUTING_KEY);
+        return BindingBuilder.bind(documentQueue).to(documentExchange).with(DOCUMENT_ROUTING_KEY);
     }
 
-    // for deserialization  so rabbit mq can process it
+    // for deserialization so RabbitMQ can process it
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
@@ -71,5 +83,3 @@ public class RabbitMQMail {
         return rabbitTemplate;
     }
 }
-
-

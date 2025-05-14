@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CandidateControllerLoggingAspect {
 
-    @Pointcut("within(com.candidateonboardingsystem.controller.CandidateController)")
+    @Pointcut("within(com.learning.HiringApp.controller.CandidateController)")
     public void candidateControllerMethods() {}
 
     @Before("candidateControllerMethods()")
@@ -36,7 +36,7 @@ public class CandidateControllerLoggingAspect {
                 ex.getMessage(), ex);
     }
 
-    @Around("execution(* com.candidateonboardingsystem.service.*.*(..))")
+    @Around("execution(* com.learning.HiringApp.service.*.*(..))")
     public Object logServiceMethods(final ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
 

@@ -3,6 +3,7 @@ package com.learning.HiringApp.mapper;
 
 import com.learning.HiringApp.dtos.BankInfoDTO;
 import com.learning.HiringApp.entity.BankInfo;
+import com.learning.HiringApp.mapper.BankInfoMapper;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")

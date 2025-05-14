@@ -1,7 +1,6 @@
 package com.learning.HiringApp.controller;
 
-import com.learning.HiringApp.dtos.CandidateDTO;
-import com.learning.HiringApp.service.producer.RabbitProducer;
+import com.learning.HiringApp.producer.RabbitProducer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,4 +1,4 @@
-package com.learning.HiringApp.controller.consumer;
+package com.learning.HiringApp.consumer;
 
 import com.learning.HiringApp.config.RabbitMQMail;
 import com.learning.HiringApp.entity.Document;
