@@ -1,4 +1,4 @@
-package com.learning.HiringApp.jwt;
+package com.learning.HiringApp.security.jwt;
 
 
 import com.learning.HiringApp.service.CustomUserDetailService;
@@ -19,10 +19,10 @@ import java.io.IOException;
 @Component
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
-    private final com.learning.HiringApp.jwt.JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
     private final CustomUserDetailService customUserDetailsService;
 
-    public JwtAuthFilter(com.learning.HiringApp.jwt.JwtUtil jwtUtil, CustomUserDetailService customUserDetailsService) {
+    public JwtAuthFilter(JwtUtil jwtUtil, CustomUserDetailService customUserDetailsService) {
         this.jwtUtil = jwtUtil;
         this.customUserDetailsService = customUserDetailsService;
     }
@@ -34,8 +34,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String username = null;
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwtToken = authHeader.substring(7).trim();
-            log.info("JWT Token: [{}]", jwtToken);
             username = jwtUtil.extractUsername(jwtToken);
+            log.info("JWT Token received for user: {}", username);
         }
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);

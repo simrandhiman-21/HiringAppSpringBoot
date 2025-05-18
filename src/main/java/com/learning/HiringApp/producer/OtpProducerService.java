@@ -1,7 +1,7 @@
 package com.learning.HiringApp.producer;
 
 
-import com.learning.HiringApp.authDto.OtpMessage;
+import com.learning.HiringApp.security.authDto.forgotpassword.OtpMessage;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 

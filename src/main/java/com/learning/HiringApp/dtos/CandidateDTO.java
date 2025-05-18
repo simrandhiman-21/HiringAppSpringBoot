@@ -36,4 +36,3 @@ public class CandidateDTO implements Serializable {
         return dto;
     }
 }
-

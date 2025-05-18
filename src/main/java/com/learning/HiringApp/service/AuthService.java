@@ -1,150 +1,57 @@
 package com.learning.HiringApp.service;
 
-import com.learning.HiringApp.authDto.*;
-import com.learning.HiringApp.authEntity.User;
-import com.learning.HiringApp.authMapper.UserMapper;
-import com.learning.HiringApp.exceptions.LoginException;
-import com.learning.HiringApp.exceptions.RegisterException;
-import com.learning.HiringApp.jwt.JwtUtil;
+import com.learning.HiringApp.security.authDto.userlogin.AuthRequest;
+import com.learning.HiringApp.security.authDto.userlogin.AuthResponse;
+import com.learning.HiringApp.security.authDto.registerrequest.RegisterRequest;
+import com.learning.HiringApp.security.authDto.registerrequest.RegisterResponse;
+import com.learning.HiringApp.security.authEntity.User;
+import com.learning.HiringApp.security.authMapper.UserMapper;
+import com.learning.HiringApp.security.jwt.JwtUtil;
 import com.learning.HiringApp.repository.UserDetailsRepository;
-import com.learning.HiringApp.producer.OtpProducerService;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Qualifier;
-
 
 @Service
 public class AuthService {
-    private final JwtUtil jwtUtil;
-    private final AuthenticationManager authenticationManager;
-    private final UserDetailsRepository userDetailsRepository;
-    private final UserMapper userMapper;
-    private final OtpProducerService otpProducerService;
-    private final PasswordEncoder passwordEncoder;
-    private final OtpService otpService;
 
-    public AuthService(final JwtUtil jwtUtil,
-                       final AuthenticationManager authenticationManager,
-                       final UserDetailsRepository userDetailsRepository,
-                       final UserMapper userMapper,
-                       final OtpProducerService otpProducerService,
-                       @Qualifier("passwordEncoder") final PasswordEncoder passwordEncoder,
-                       final OtpService otpService) {
-        this.jwtUtil = jwtUtil;
-        this.authenticationManager = authenticationManager;
+    private final UserDetailsRepository userDetailsRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+    private final UserMapper userMapper;
+
+
+    public AuthService(UserDetailsRepository userDetailsRepository, PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil, UserMapper userMapper) {
         this.userDetailsRepository = userDetailsRepository;
-        this.userMapper = userMapper;
-        this.otpProducerService = otpProducerService;
         this.passwordEncoder = passwordEncoder;
-        this.otpService = otpService;
+        this.jwtUtil = jwtUtil;
+        this.userMapper = userMapper;
     }
 
+    public RegisterResponse register(RegisterRequest request) {
+        User user = userMapper.toUser(request);
 
+        if (user.getRole() == null) {
+            user.setRole("USER");
+        }
+
+        // make sure we encode *before* saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        User saved = userDetailsRepository.save(user);
+        return new RegisterResponse(saved.getId(), saved.getEmail(), "Registration successful");
+    }
 
 
     public AuthResponse login(AuthRequest authRequest) {
-        try{
-            User user = authenticate(authRequest.email(), authRequest.password());
-            String otp = otpService.generateOtp(authRequest.email());
+        User user = userDetailsRepository.findByEmail(authRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
-            otpProducerService.sendMessageToListener(new OtpMessage(
-                    "hiringAuthOtpTopicExchange",
-                    "auth.otp",
-                    authRequest.email(),
-                    otp
-            ));
-            return new AuthResponse("OTP sent to " + authRequest.email());
-        } catch (Exception e) {
-            throw new LoginException(e.getMessage());
-        }
-    }
-
-    public RegisterResponse register(RegisterRequest registerRequest){
-        try{
-            userDetailsRepository.save(userMapper.toUser(registerRequest));
-
-            User user = authenticate(registerRequest.email(), registerRequest.password());
-
-            String otp = otpService.generateOtp(registerRequest.email());
-
-            otpProducerService.sendMessageToListener(new OtpMessage(
-                    "hiringAuthOtpTopicExchange",
-                    "auth.otp",
-                    registerRequest.email(),
-                    otp
-            ));
-            return new RegisterResponse("OTP sent to " + registerRequest.email());
-        } catch (Exception e) {
-            throw new RegisterException(e.getMessage());
-        }
-    }
-
-    public VerifyOtpResponse verifyOtp(VerifyOtpRequest verifyOtpRequest){
-        String email = verifyOtpRequest.email();
-        String otp = verifyOtpRequest.otp();
-
-        if (otpService.validateOtp(email, otp)){
-            User user = userDetailsRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
-
-            otpService.deleteOtp(email);
-            return new VerifyOtpResponse(true, jwtUtil.generateToken(user));
-        }
-        return new VerifyOtpResponse(false, null);
-    }
-
-    public String forgetPassword(ForgotPasswordRequest forgotPasswordRequest){
-        String email = forgotPasswordRequest.email();
-
-        User user = userDetailsRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        String otp = otpService.generateOtp(forgotPasswordRequest.email());
-
-        otpProducerService.sendMessageToListener(new OtpMessage(
-                "hiringAuthOtpTopicExchange",
-                "auth.otp",
-                email,
-                otp
-        ));
-
-        return "OTP sent to " + email;
-    }
-
-    public boolean resetPassword(ResetPasswordRequest resetPasswordRequest){
-        String email = resetPasswordRequest.email();
-        String otp = resetPasswordRequest.otp();
-        String newPassword = passwordEncoder.encode(resetPasswordRequest.newPassword());
-
-        if (otpService.validateOtp(email, otp)){
-            User user = userDetailsRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("User with email " + email + " not found"));
-            otpService.deleteOtp(email);
-            user.setPassword(newPassword);
-            userDetailsRepository.save(user);
-            return true;
-        }
-        return false;
-    }
-
-    private User authenticate(String username, String password) {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
-            );
-        } catch (BadCredentialsException ex) {
-            if (!userDetailsRepository.existsByEmail(username)) {
-                System.out.println("Login failed: user not found - " + username);
-            } else {
-                System.out.println("Login failed: invalid password for - " + username);
-            }
-            throw new LoginException("Invalid email or password");
+        if (!passwordEncoder.matches(authRequest.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
         }
 
-        return userDetailsRepository.findByEmail(username)
-                .orElseThrow(() -> new LoginException("Invalid email or password"));
+        String token = jwtUtil.generateToken(user);
+        return new AuthResponse(token);
     }
 }

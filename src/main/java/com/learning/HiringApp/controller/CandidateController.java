@@ -3,12 +3,13 @@ import com.learning.HiringApp.dtos.CandidateDTO;
 import com.learning.HiringApp.entity.Candidate;
 import com.learning.HiringApp.exceptions.NotFoundException;
 import com.learning.HiringApp.service.CandidateService;
+import com.learning.HiringApp.service.EmailService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.learning.HiringApp.producer.RabbitProducer;
+
 
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class CandidateController {
     private CandidateService candidateService;
 
     @Autowired
-    private RabbitProducer rabbitProducer;
+    private EmailService emailService;
 
     @GetMapping("/all")
     public List<Candidate> getAllCandidates() {
@@ -58,17 +59,12 @@ public class CandidateController {
 
     // New endpoint to send emails to all candidates with "OFFERED" status
     @GetMapping("/send-offered-emails")
-    public String sendOfferedEmails() {
-        List<Candidate> offeredCandidates = candidateService.getCandidatesByStatus("OFFERED");
-        int sentCount = 0;
+    public ResponseEntity<String> sendOfferedEmails() {
+        List<Candidate> offered = candidateService.getCandidatesByStatus("OFFERED");
+        emailService.sendOfferEmails(offered);
 
-        for (Candidate candidate : offeredCandidates) {
-            CandidateDTO candidateDTO = CandidateDTO.fromEntity(candidate);
-            rabbitProducer.sendCandidate(candidateDTO);
-            sentCount++;
-            log.info("Candidate {} sent to RabbitMQ for email notification", candidateDTO.getFullName());
-        }
-
-        return "Sent email notifications for " + sentCount + " candidates with OFFERED status";
+        String msg = "Sent email notifications for " + offered.size() + " candidates with OFFERED status";
+        return ResponseEntity.ok(msg);
     }
+
 }

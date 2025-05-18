@@ -1,6 +1,6 @@
 package com.learning.HiringApp.producer;
 
-import com.learning.HiringApp.config.RabbitMQMail;
+import com.learning.HiringApp.security.config.RabbitMQMail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;

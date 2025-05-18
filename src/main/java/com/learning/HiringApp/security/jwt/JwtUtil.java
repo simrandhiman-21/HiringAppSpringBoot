@@ -1,9 +1,10 @@
-package com.learning.HiringApp.jwt;
+package com.learning.HiringApp.security.jwt;
 
-import com.learning.HiringApp.authEntity.User;
+import com.learning.HiringApp.security.authEntity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -12,8 +13,12 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-    private final String SECRET = "supersecretkeyformyjwt1234567890!";
-    private final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
+    @Value("${jwt.secret}")
+    private String SECRET;
+
+    private SecretKey getSecretKey() {
+        return Keys.hmacShaKeyFor(SECRET.getBytes());
+    }
 
     public String generateToken(User user) {
         final long EXPIRES_IN = 1000 * 60 * 60;
@@ -24,12 +29,12 @@ public class JwtUtil {
                 .claim("role", user.getRole())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRES_IN))
-                .signWith(SECRET_KEY)
+                .signWith(getSecretKey())
                 .compact();
     }
 
     public String extractUsername(String token) {
-        return getClaimsFromToken (token).getSubject();
+        return getClaimsFromToken(token).getSubject();
     }
 
     public boolean validateToken(String username, UserDetails userDetails, String token) {
@@ -40,12 +45,12 @@ public class JwtUtil {
         Claims claims = getClaimsFromToken(token);
         return claims.getExpiration().before(new Date(System.currentTimeMillis()));
     }
+
     private Claims getClaimsFromToken(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(getSecretKey())
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
-
 }

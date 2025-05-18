@@ -1,9 +1,10 @@
-package com.learning.HiringApp.authDto;
+package com.learning.HiringApp.security.authDto.forgotpassword;
 
 
 import lombok.Data;
 
 @Data
+
 public class OtpMessage {
     private String to;
     private String otp;

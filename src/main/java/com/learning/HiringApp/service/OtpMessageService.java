@@ -1,24 +1,15 @@
-    package com.learning.HiringApp.service;
+package com.learning.HiringApp.service;
 
-    import com.learning.HiringApp.authDto.OtpMessage;
-    import jakarta.mail.MessagingException;
-    import org.springframework.stereotype.Service;
+import com.learning.HiringApp.security.authDto.forgotpassword.OtpMessage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-    @Service
-    public class OtpMessageService {
-        private final EmailService emailService;
+@Service
+public class OtpMessageService {
+    @Autowired
+    private EmailService emailService;
 
-        public OtpMessageService(final EmailService emailService) {
-            this.emailService = emailService;
-        }
-
-        public void sendOtpEmail(OtpMessage otpMessage) {
-            try {
-                emailService.sendOtpMail(otpMessage);
-            } catch (MessagingException e) {
-                e.printStackTrace(); // or handle it properly
-            }
-        }
-
-
+    public void processOtpMessage(OtpMessage message) {
+        emailService.sendOtpEmail(message.getTo(), message.getOtp());
     }
+}

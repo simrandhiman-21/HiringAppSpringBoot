@@ -1,6 +1,6 @@
 package com.learning.HiringApp.consumer;
 
-import com.learning.HiringApp.config.RabbitMQMail;
+import com.learning.HiringApp.security.config.RabbitMQMail;
 import com.learning.HiringApp.entity.Document;
 import com.learning.HiringApp.repository.CandidateRepository;
 import com.learning.HiringApp.repository.DocumentRepository;
@@ -35,7 +35,7 @@ public class DocumentConsumer {
                     .documentType("EMPTY")
                     .fileName(null)
                     .fileData(null)
-                    .uploadedDate(LocalDate.now().toString())
+                    .uploadedDate(LocalDate.now())
                     .build();
             documentRepository.save(document);
         });

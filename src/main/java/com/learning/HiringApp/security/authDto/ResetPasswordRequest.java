@@ -1,4 +1,4 @@
-package com.learning.HiringApp.authDto;
+package com.learning.HiringApp.security.authDto;
 
 
 import jakarta.validation.constraints.NotBlank;

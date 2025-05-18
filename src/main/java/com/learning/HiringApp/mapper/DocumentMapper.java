@@ -11,7 +11,8 @@ public class DocumentMapper {
                 .id(document.getId())
                 .documentType(document.getDocumentType())
                 .fileName(document.getFileName())
-                .uploadedDate(document.getUploadedDate())
+                .uploadedDate(document.getUploadedDate() != null
+                        ? document.getUploadedDate().toString() : null)
                 .candidateId(document.getCandidate().getId())
                 .build();
     }

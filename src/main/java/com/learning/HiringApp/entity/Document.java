@@ -3,7 +3,10 @@ package com.learning.HiringApp.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
+@Table(name = "documents")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,11 +21,12 @@ public class Document {
 
     private String fileName;
 
-    private String uploadedDate;
-
     @Lob
-    @Column(name = "file_data", columnDefinition = "LONGBLOB") // For MySQL; use BYTEA for PostgreSQL
+    @Column(name = "file_data", columnDefinition = "LONGBLOB")
     private byte[] fileData;
+
+    @Column(name = "uploaded_date", nullable = false)
+    private LocalDate uploadedDate;
 
     @ManyToOne
     @JoinColumn(name = "candidate_id", nullable = false)
